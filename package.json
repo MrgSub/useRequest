@@ -1,0 +1,16 @@
+{
+  "name": "@ajxb/userequest",
+  "version": "1.0.0",
+  "description": "A lazy, typescript friendly approach to API requests in modern React",
+  "main": "index.js",
+  "private": false,
+  "scripts": {
+    "build": "tsc index.ts"
+  },
+  "author": "ajxb & Dustin J.",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": "latest",
+    "lodash": "latest"
+  }
+}
