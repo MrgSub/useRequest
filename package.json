@@ -1,11 +1,11 @@
 {
   "name": "@ajxb/userequest",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A lazy, typescript friendly approach to API requests in modern React",
-  "main": "index.js",
+  "main": "dist/index.js",
   "private": false,
   "scripts": {
-    "build": "tsc index.ts"
+    "build": "tsc index.ts --outDir dist"
   },
   "repository": {
     "url": "https://github.com/MrgSub/useRequest.git"

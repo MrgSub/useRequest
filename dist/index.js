@@ -49,10 +49,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.useRequest = void 0;
 var react_1 = require("react");
-var camelCase_1 = require("lodash/camelCase");
-var capitalize_1 = require("lodash/capitalize");
+var lodash_1 = require("lodash");
 var formatKey = function (functionName, keyName) {
-    return "".concat((0, camelCase_1["default"])(functionName)).concat((0, capitalize_1["default"])(keyName));
+    return "".concat((0, lodash_1.camelCase)(functionName)).concat((0, lodash_1.capitalize)(keyName));
 };
 var suffixes = {
     Request: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
