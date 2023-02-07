@@ -7,6 +7,9 @@
   "scripts": {
     "build": "tsc index.ts"
   },
+  "repository": {
+    "url": "https://github.com/MrgSub/useRequest.git"
+  },
   "author": "ajxb & Dustin J.",
   "license": "ISC",
   "peerDependencies": {
