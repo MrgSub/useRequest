@@ -13,7 +13,10 @@
   "author": "ajxb & Dustin J.",
   "license": "ISC",
   "peerDependencies": {
-    "react": "latest",
-    "lodash": "latest"
+    "lodash": "latest",
+    "react": "latest"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191"
   }
 }

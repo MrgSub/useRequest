@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useReducer} from 'react';
-import camelCase from 'lodash/camelCase';
-import capitalize from 'lodash/capitalize';
+import {camelCase, capitalize} from 'lodash';
 
 interface IValidResponse {
     data: any;
