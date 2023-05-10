@@ -53,7 +53,7 @@ var lodash_1 = require("lodash");
 var formatKey = function (functionName, keyName) {
     return "".concat((0, lodash_1.camelCase)(functionName)).concat((0, lodash_1.capitalize)(keyName));
 };
-var suffixes = {
+var suffixes = function () { return ({
     Request: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
         return [2 /*return*/, null];
     }); }); },
@@ -61,7 +61,7 @@ var suffixes = {
     Error: null,
     Loading: false,
     Statuscode: null
-};
+}); };
 var EAction;
 (function (EAction) {
     EAction["reset"] = "reset";
@@ -86,7 +86,7 @@ var reducer = function (state, action) {
 };
 /**
  * Special recipe for lazy
- * @example func.name = handleLogin -> this returns {
+ * @example name = handleLogin -> {
  *     ${func}Response, example: handleLoginResponse
  *     ${func}Request,
  *     ${func}Loading
@@ -98,9 +98,8 @@ var reducer = function (state, action) {
  */
 var useRequest = function (func, name) {
     var _a;
-    if (!name) {
+    if (!name)
         throw new Error('Function name not found, please pass the function name as the 2nd argument');
-    }
     var _b = (0, react_1.useReducer)(reducer, {
         Loading: false,
         Response: null,

@@ -12,8 +12,8 @@ interface IState {
     Statuscode: null | number
 }
 
-interface ISuffixes extends IState {
-    Request: (values?:any) => Promise<TResponse>,
+interface ISuffixes<Data> extends IState {
+    Request: (values?:Data) => Promise<TResponse>,
     Response: Record<string, any> | null
     Error: Record<string, any> | null,
     Loading: boolean,
@@ -21,18 +21,18 @@ interface ISuffixes extends IState {
 }
 
 type TResponse = IValidResponse | unknown;
-type returnType<T extends string> = {[P in keyof typeof suffixes & string as `${T}${P}`]: typeof suffixes[P]  };
+type returnType<Data extends object, T extends string> = {[P in keyof ReturnType<typeof suffixes<P>> & string as `${T}${P}`]: ReturnType<typeof suffixes<Data>>[P] };
 
 const formatKey = (functionName: string, keyName: string) =>
     `${camelCase(functionName)}${capitalize(keyName)}`;
 
-const suffixes: ISuffixes  = {
+const suffixes = <T>(): ISuffixes<T> => ({
     Request: async () => null,
     Response: null,
     Error: null,
     Loading: false,
     Statuscode: null,
-} as const;
+} as const);
 
 enum EAction {
     'reset' = 'reset',
@@ -75,7 +75,7 @@ const reducer = (state: IState, action: {type: EAction, value?: Record<keyof ISt
 
 /**
  * Special recipe for lazy
- * @example func.name = handleLogin -> this returns {
+ * @example name = handleLogin -> {
  *     ${func}Response, example: handleLoginResponse
  *     ${func}Request,
  *     ${func}Loading
@@ -85,13 +85,11 @@ const reducer = (state: IState, action: {type: EAction, value?: Record<keyof ISt
  * @param func
  * @param name
  */
-export const useRequest = <T extends string>(
-    func: (values?: any) => Promise<TResponse>,
-    name?: T
+export const useRequest = <Data extends object, T extends string = ''>(
+    func: (values?: Data) => Promise<TResponse>,
+    name: string
 ) => {
-    if (!name) {
-        throw new Error('Function name not found, please pass the function name as the 2nd argument')
-    }
+    if (!name) throw new Error('Function name not found, please pass the function name as the 2nd argument')
     const [state, dispatch] = useReducer(reducer, {
         Loading: false,
         Response: null,
@@ -102,7 +100,7 @@ export const useRequest = <T extends string>(
     const resetState = () => dispatch({type: EAction.reset})
 
     const doRequest = useCallback(
-        (_data?: any) => {
+        (_data?: Data) => {
             resetState();
             dispatch({type: EAction.loadingStart})
             return func(_data)
@@ -147,5 +145,5 @@ export const useRequest = <T extends string>(
         [formatKey(name, 'error')]: state.Error,
         [formatKey(name, 'loading')]: state.Loading,
         [formatKey(name, 'statuscode')]: state.Statuscode,
-    } as returnType<T>;
+    } as returnType<Data, T>
 };

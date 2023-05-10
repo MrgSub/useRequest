@@ -21,7 +21,7 @@ const MyComponent = () => {
         handleLoginLoading,
         handleLoginResponse,
         handleLoginError,
-    } = useRequest(handleLogin, 'handleLogin');
+    } = useRequest<Login,'handleLogin'>(handleLogin, 'handleLogin');
     
     
     // Handle API success
@@ -39,7 +39,7 @@ const MyComponent = () => {
     },[handleLoginError])
     
     // Submit the form
-    const onSubmit = (data: any) => handleLoginRequest({username: data.username, password: data.password})
+    const onSubmit = (data: ILogin) => handleLoginRequest({username: data.username, password: data.password})
     
     // Example button that's disabled while loading
     return <div>
@@ -58,10 +58,9 @@ import {useRequest} from '@ajxb/userequest'
 ```
 
 ```typescript
-const {} = useRequest(myFunction, 'myFunction')
+const {} = useRequest<MyInterface,'myFunction'>(myFunction, 'myFunction')
 ```
 
 #### Known ughs:
 
 - `function.name` is an es6 feature which doesn't exist anymore, might make a workaround. For now, you should pass the function name as a second argument 
-- Types for function's inputs
