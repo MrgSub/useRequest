@@ -1,10 +1,10 @@
 import {useCallback, useEffect, useReducer} from 'react';
 import {camelCase, capitalize} from 'lodash';
 
-type RequestFunction<Data> = (values: Data) => Promise<TResponse>
+type RequestFunction<RequestData, ResponseData extends object = {}> = (values: RequestData) => Promise<TResponse<ResponseData>>
 
-interface IValidResponse {
-    data: any;
+interface IValidResponse<Data> {
+    data: Data;
 }
 
 interface IState {
@@ -14,21 +14,21 @@ interface IState {
     Statuscode: null | number
 }
 
-interface ISuffixes<Data> extends IState {
-    Request: RequestFunction<Data>,
-    Response: Record<string, any> | null
+interface ISuffixes<Data, R extends object> extends IState {
+    Request: RequestFunction<Data, R>,
+    Response: R | Record<string, any> | null
     Error: Record<string, any> | null,
     Loading: boolean,
     Statuscode: null | number
 }
 
-type TResponse = IValidResponse | unknown;
-type returnType<Data extends object, T extends string> = {[P in keyof ReturnType<typeof suffixes<P>> & string as `${T}${P}`]: ReturnType<typeof suffixes<Data>>[P] };
+type TResponse<Data> = IValidResponse<Data> | unknown;
+type returnType<Data extends object, T extends string, R extends object> = {[P in keyof ReturnType<typeof suffixes<P, R>> & string as `${T}${P}`]: ReturnType<typeof suffixes<Data, R>>[P] };
 
 const formatKey = (functionName: string, keyName: string) =>
     `${camelCase(functionName)}${capitalize(keyName)}`;
 
-const suffixes = <T>(): ISuffixes<T> => ({
+const suffixes = <T, R extends object>(): ISuffixes<T, R> => ({
     Request: async () => null,
     Response: null,
     Error: null,
@@ -87,8 +87,8 @@ const reducer = (state: IState, action: {type: EAction, value?: Record<keyof ISt
  * @param func
  * @param name
  */
-export const useRequest = <Data extends object = {}, Name extends string = ''>(
-    func: RequestFunction<Data>,
+export const useRequest = <Name extends string = '',RequestData extends object = {}, ResponseData extends object = {}>(
+    func: RequestFunction<RequestData, ResponseData>,
     name: Name
 ) => {
     if (!name) throw new Error('Function name not found, please pass the function name as the 2nd argument')
@@ -102,7 +102,7 @@ export const useRequest = <Data extends object = {}, Name extends string = ''>(
     const resetState = () => dispatch({type: EAction.reset})
 
     const doRequest = useCallback(
-        (_data: Data) => {
+        (_data: RequestData) => {
             resetState();
             dispatch({type: EAction.loadingStart})
             return func(_data)
@@ -110,7 +110,7 @@ export const useRequest = <Data extends object = {}, Name extends string = ''>(
                     dispatch({
                         type: EAction.handleResponse,
                         value: {
-                            Response: (e as IValidResponse).data || true,
+                            Response: (e as IValidResponse<ResponseData>).data || true,
                             Loading: false,
                             Statuscode: 200,
                             Error: null
@@ -147,5 +147,5 @@ export const useRequest = <Data extends object = {}, Name extends string = ''>(
         [formatKey(name, 'error')]: state.Error,
         [formatKey(name, 'loading')]: state.Loading,
         [formatKey(name, 'statuscode')]: state.Statuscode,
-    } as returnType<Data, Name>
+    } as returnType<RequestData, Name, ResponseData>
 };
