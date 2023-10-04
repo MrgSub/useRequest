@@ -1,6 +1,7 @@
 {
   "include": ["index.ts"],
   "compilerOptions": {
+    "lib": ["ES2015"],
     "outDir": "dist",
     "declaration": true
   }

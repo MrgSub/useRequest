@@ -1,6 +1,8 @@
 import {useCallback, useEffect, useReducer} from 'react';
 import {camelCase, capitalize} from 'lodash';
 
+type RequestFunction<Data> = (values?: Data) => Promise<TResponse>
+
 interface IValidResponse {
     data: any;
 }
@@ -13,7 +15,7 @@ interface IState {
 }
 
 interface ISuffixes<Data> extends IState {
-    Request: (values?:Data) => Promise<TResponse>,
+    Request: RequestFunction<Data>,
     Response: Record<string, any> | null
     Error: Record<string, any> | null,
     Loading: boolean,
@@ -85,9 +87,9 @@ const reducer = (state: IState, action: {type: EAction, value?: Record<keyof ISt
  * @param func
  * @param name
  */
-export const useRequest = <Data extends object, T extends string = ''>(
-    func: (values?: Data) => Promise<TResponse>,
-    name: string
+export const useRequest = <Data extends object = {}, Name extends string = ''>(
+    func: RequestFunction<Data>,
+    name: Name
 ) => {
     if (!name) throw new Error('Function name not found, please pass the function name as the 2nd argument')
     const [state, dispatch] = useReducer(reducer, {
@@ -145,5 +147,5 @@ export const useRequest = <Data extends object, T extends string = ''>(
         [formatKey(name, 'error')]: state.Error,
         [formatKey(name, 'loading')]: state.Loading,
         [formatKey(name, 'statuscode')]: state.Statuscode,
-    } as returnType<Data, T>
+    } as returnType<Data, Name>
 };
