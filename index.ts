@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useReducer} from 'react';
 import {camelCase, capitalize} from 'lodash';
 
-type RequestFunction<Data> = (values?: Data) => Promise<TResponse>
+type RequestFunction<Data> = (values: Data) => Promise<TResponse>
 
 interface IValidResponse {
     data: any;
@@ -102,7 +102,7 @@ export const useRequest = <Data extends object = {}, Name extends string = ''>(
     const resetState = () => dispatch({type: EAction.reset})
 
     const doRequest = useCallback(
-        (_data?: Data) => {
+        (_data: Data) => {
             resetState();
             dispatch({type: EAction.loadingStart})
             return func(_data)

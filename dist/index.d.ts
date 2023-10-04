@@ -1,4 +1,4 @@
-declare type RequestFunction<Data> = (values?: Data) => Promise<TResponse>;
+declare type RequestFunction<Data> = (values: Data) => Promise<TResponse>;
 interface IValidResponse {
     data: any;
 }
