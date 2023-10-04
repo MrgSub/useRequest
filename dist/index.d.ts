@@ -1,3 +1,4 @@
+declare type RequestFunction<Data> = (values?: Data) => Promise<TResponse>;
 interface IValidResponse {
     data: any;
 }
@@ -8,7 +9,7 @@ interface IState {
     Statuscode: null | number;
 }
 interface ISuffixes<Data> extends IState {
-    Request: (values?: Data) => Promise<TResponse>;
+    Request: RequestFunction<Data>;
     Response: Record<string, any> | null;
     Error: Record<string, any> | null;
     Loading: boolean;
@@ -31,5 +32,5 @@ declare const suffixes: <T>() => ISuffixes<T>;
  * @param func
  * @param name
  */
-export declare const useRequest: <Data extends object, T extends string = "">(func: (values?: Data) => Promise<TResponse>, name: string) => returnType<Data, T>;
+export declare const useRequest: <Data extends object = {}, Name extends string = "">(func: RequestFunction<Data>, name: Name) => returnType<Data, Name>;
 export {};
