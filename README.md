@@ -1,5 +1,11 @@
 ## useRequest - A "Lazy" dev's hook
 
+### Dependencies:
+
+- We use `camelCase` `capitalize` from `lodash`
+- We use `AxiosError` from `axios` (We assume you're using Axios)
+- We use `createContext` `useContext` `useReducer` from `react`
+
 ### Example:
 
 ```typescript jsx
@@ -21,7 +27,7 @@ const MyComponent = () => {
         handleLoginLoading,
         handleLoginResponse,
         handleLoginError,
-    } = useRequest<Login,'handleLogin'>(handleLogin, 'handleLogin');
+    } = useRequest(handleLogin, 'handleLogin');
     
     
     // Handle API success
@@ -63,4 +69,4 @@ const {} = useRequest<MyInterface,'myFunction'>(myFunction, 'myFunction')
 
 #### Known ughs:
 
-- `function.name` is an es6 feature which doesn't exist anymore, might make a workaround. For now, you should pass the function name as a second argument 
+- `function.name` is an es6 feature which doesn't exist anymore, might make a workaround. For now, you should pass the function name as a second argument

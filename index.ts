@@ -1,5 +1,7 @@
 import {useCallback, useEffect, useReducer} from 'react';
 import {camelCase, capitalize} from 'lodash';
+import {EGlobalActions, useRequestContext} from "./global";
+import {AxiosError} from 'axios'
 
 type RequestFunction<RequestData, ResponseData extends object = {}> = (values: RequestData) => Promise<TResponse<ResponseData>>
 
@@ -87,7 +89,7 @@ const reducer = (state: IState, action: {type: EAction, value?: Record<keyof ISt
  * @param func
  * @param name
  */
-export const useRequest = <Name extends string = '',RequestData extends object = {}, ResponseData extends object = {}>(
+export const useRequest = <Name extends string = '', RequestData extends object = {}, ResponseData extends object = {}>(
     func: RequestFunction<RequestData, ResponseData>,
     name: Name
 ) => {
@@ -98,41 +100,42 @@ export const useRequest = <Name extends string = '',RequestData extends object =
         Statuscode: null,
         Error: null,
     })
+    const { dispatch: globalDispatch, loading, error } = useRequestContext()
 
     const resetState = () => dispatch({type: EAction.reset})
 
     const doRequest = useCallback(
-        (_data: RequestData) => {
+        async (_data: RequestData) => {
             resetState();
             dispatch({type: EAction.loadingStart})
-            return func(_data)
-                .then((e) =>
-                    dispatch({
-                        type: EAction.handleResponse,
-                        value: {
-                            Response: (e as IValidResponse<ResponseData>).data || true,
-                            Loading: false,
-                            Statuscode: 200,
-                            Error: null
-                        }
-                    })
-                )
-                .catch((e) =>
-                    dispatch({
-                        type: EAction.handleResponse,
-                        value: {
-                            Response: null,
-                            Loading: false,
-                            Statuscode: e?.response?.status || 500,
-                            Error: e?.response?.data || e
-                        }
-                    })
-                );
+            try {
+                const exec = await func(_data);
+                return dispatch({
+                    type: EAction.handleResponse,
+                    value: {
+                        Response: (exec as IValidResponse<ResponseData>).data || true,
+                        Loading: false,
+                        Statuscode: 200,
+                        Error: null
+                    }
+                });
+            } catch (error) {
+                return dispatch({
+                    type: EAction.handleResponse,
+                    value: {
+                        Response: null,
+                        Loading: false,
+                        Statuscode: error?.response?.status || 500,
+                        Error: error?.response?.data || error
+                    }
+                });
+            }
         },
         [func]
     );
 
     useEffect(() => {
+        if (globalDispatch) globalDispatch({type: EGlobalActions.ADD_REQUEST, request: name})
         resetState();
         dispatch({type: EAction.loadingStop})
         return () => {
@@ -141,11 +144,21 @@ export const useRequest = <Name extends string = '',RequestData extends object =
         };
     }, []);
 
+    const isForcedLoading = useCallback(() => {
+        if (!loading) return false
+        return loading.some(e=>e === name)
+    }, [loading]);
+
+    const isForcedError = useCallback(() => {
+        if (!error) return false
+        return error.some(e=>e === name)
+    }, [error]);
+
     return {
         [formatKey(name, 'request')]: doRequest,
         [formatKey(name, 'response')]: state.Response,
-        [formatKey(name, 'error')]: state.Error,
-        [formatKey(name, 'loading')]: state.Loading,
+        [formatKey(name, 'error')]: isForcedError() ? new AxiosError('Generic error from @ajxb/useRequest', '400') : state.Error,
+        [formatKey(name, 'loading')]: isForcedLoading() ?? state.Loading,
         [formatKey(name, 'statuscode')]: state.Statuscode,
     } as returnType<RequestData, Name, ResponseData>
 };

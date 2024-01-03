@@ -25,7 +25,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -46,10 +46,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.useRequest = void 0;
 var react_1 = require("react");
 var lodash_1 = require("lodash");
+var global_1 = require("./global");
+var axios_1 = require("axios");
 var formatKey = function (functionName, keyName) {
     return "".concat((0, lodash_1.camelCase)(functionName)).concat((0, lodash_1.capitalize)(keyName));
 };
@@ -60,7 +62,7 @@ var suffixes = function () { return ({
     Response: null,
     Error: null,
     Loading: false,
-    Statuscode: null
+    Statuscode: null,
 }); };
 var EAction;
 (function (EAction) {
@@ -98,43 +100,58 @@ var reducer = function (state, action) {
  */
 var useRequest = function (func, name) {
     var _a;
+    var _b;
     if (!name)
         throw new Error('Function name not found, please pass the function name as the 2nd argument');
-    var _b = (0, react_1.useReducer)(reducer, {
+    var _c = (0, react_1.useReducer)(reducer, {
         Loading: false,
         Response: null,
         Statuscode: null,
-        Error: null
-    }), state = _b[0], dispatch = _b[1];
+        Error: null,
+    }), state = _c[0], dispatch = _c[1];
+    var _d = (0, global_1.useRequestContext)(), globalDispatch = _d.dispatch, loading = _d.loading, error = _d.error;
     var resetState = function () { return dispatch({ type: EAction.reset }); };
-    var doRequest = (0, react_1.useCallback)(function (_data) {
-        resetState();
-        dispatch({ type: EAction.loadingStart });
-        return func(_data)
-            .then(function (e) {
-            return dispatch({
-                type: EAction.handleResponse,
-                value: {
-                    Response: e.data || true,
-                    Loading: false,
-                    Statuscode: 200,
-                    Error: null
-                }
-            });
-        })["catch"](function (e) {
-            var _a, _b;
-            return dispatch({
-                type: EAction.handleResponse,
-                value: {
-                    Response: null,
-                    Loading: false,
-                    Statuscode: ((_a = e === null || e === void 0 ? void 0 : e.response) === null || _a === void 0 ? void 0 : _a.status) || 500,
-                    Error: ((_b = e === null || e === void 0 ? void 0 : e.response) === null || _b === void 0 ? void 0 : _b.data) || e
-                }
-            });
+    var doRequest = (0, react_1.useCallback)(function (_data) { return __awaiter(void 0, void 0, void 0, function () {
+        var exec, error_1;
+        var _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    resetState();
+                    dispatch({ type: EAction.loadingStart });
+                    _c.label = 1;
+                case 1:
+                    _c.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, func(_data)];
+                case 2:
+                    exec = _c.sent();
+                    return [2 /*return*/, dispatch({
+                            type: EAction.handleResponse,
+                            value: {
+                                Response: exec.data || true,
+                                Loading: false,
+                                Statuscode: 200,
+                                Error: null
+                            }
+                        })];
+                case 3:
+                    error_1 = _c.sent();
+                    return [2 /*return*/, dispatch({
+                            type: EAction.handleResponse,
+                            value: {
+                                Response: null,
+                                Loading: false,
+                                Statuscode: ((_a = error_1 === null || error_1 === void 0 ? void 0 : error_1.response) === null || _a === void 0 ? void 0 : _a.status) || 500,
+                                Error: ((_b = error_1 === null || error_1 === void 0 ? void 0 : error_1.response) === null || _b === void 0 ? void 0 : _b.data) || error_1
+                            }
+                        })];
+                case 4: return [2 /*return*/];
+            }
         });
-    }, [func]);
+    }); }, [func]);
     (0, react_1.useEffect)(function () {
+        if (globalDispatch)
+            globalDispatch({ type: global_1.EGlobalActions.ADD_REQUEST, request: name });
         resetState();
         dispatch({ type: EAction.loadingStop });
         return function () {
@@ -142,11 +159,21 @@ var useRequest = function (func, name) {
             dispatch({ type: EAction.loadingStop });
         };
     }, []);
+    var isForcedLoading = (0, react_1.useCallback)(function () {
+        if (!loading)
+            return false;
+        return loading.some(function (e) { return e === name; });
+    }, [loading]);
+    var isForcedError = (0, react_1.useCallback)(function () {
+        if (!error)
+            return false;
+        return error.some(function (e) { return e === name; });
+    }, [error]);
     return _a = {},
         _a[formatKey(name, 'request')] = doRequest,
         _a[formatKey(name, 'response')] = state.Response,
-        _a[formatKey(name, 'error')] = state.Error,
-        _a[formatKey(name, 'loading')] = state.Loading,
+        _a[formatKey(name, 'error')] = isForcedError() ? new axios_1.AxiosError('Generic error from @ajxb/useRequest', '400') : state.Error,
+        _a[formatKey(name, 'loading')] = (_b = isForcedLoading()) !== null && _b !== void 0 ? _b : state.Loading,
         _a[formatKey(name, 'statuscode')] = state.Statuscode,
         _a;
 };

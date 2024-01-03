@@ -1,4 +1,4 @@
-declare type RequestFunction<RequestData, ResponseData extends object = {}> = (values: RequestData) => Promise<TResponse<ResponseData>>;
+type RequestFunction<RequestData, ResponseData extends object = {}> = (values: RequestData) => Promise<TResponse<ResponseData>>;
 interface IValidResponse<Data> {
     data: Data;
 }
@@ -15,8 +15,8 @@ interface ISuffixes<Data, R extends object> extends IState {
     Loading: boolean;
     Statuscode: null | number;
 }
-declare type TResponse<Data> = IValidResponse<Data> | unknown;
-declare type returnType<Data extends object, T extends string, R extends object> = {
+type TResponse<Data> = IValidResponse<Data> | unknown;
+type returnType<Data extends object, T extends string, R extends object> = {
     [P in keyof ReturnType<typeof suffixes<P, R>> & string as `${T}${P}`]: ReturnType<typeof suffixes<Data, R>>[P];
 };
 declare const suffixes: <T, R extends object>() => ISuffixes<T, R>;

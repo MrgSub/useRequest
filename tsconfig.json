@@ -1,7 +1,8 @@
 {
-  "include": ["index.ts"],
+  "include": ["index.ts", "global.tsx"],
   "compilerOptions": {
-    "lib": ["ES2015"],
+    "jsx": "react-jsx",
+    "lib": ["ES2022"],
     "outDir": "dist",
     "declaration": true
   }
